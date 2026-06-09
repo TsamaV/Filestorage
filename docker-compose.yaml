@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: postgres_go
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password 
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres-data:/data/postgres
+    ports:
+      - "5433:5432"
+
+  app:
+    build: .
+    container_name: file_storage
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - minio
+
+  minio:
+    container_name: minio
+    image: minio/minio
+    command: server /data
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      mc mb myminio/filestorage --ignore-existing;
+      "
