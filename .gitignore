@@ -1,1 +1,11 @@
-/.env
+.env
+postgres-data/
+logs/
+api
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.DS_Store
